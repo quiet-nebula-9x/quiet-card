@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>For Your Eyes Only</title>
+<style>
+  :root {
+    --bg: #141414;
+    --surface: #1c1c1c;
+    --card: #0d0d0d;
+    --line: rgba(255, 255, 255, 0.25);
+    --text: #f5f5f5;
+    --muted: rgba(255, 255, 255, 0.55);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, 'Times New Roman', serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 24px;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+  }
+  .logo {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  h1 {
+    font-weight: normal;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .tagline {
+    color: var(--muted);
+    font-size: 14px;
+    font-style: italic;
+    margin-bottom: 32px;
+  }
+  .btn {
+    display: block;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--text);
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 18px;
+    padding: 22px 18px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.98); border-color: rgba(255,255,255,0.5); }
+  .btn .icon { font-size: 26px; display: block; margin-bottom: 8px; }
+  .btn .sub {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .footer {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 24px;
+  }
+  /* Prompt deck overlay */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 10;
+  }
+  .overlay.open { display: flex; }
+  .deck-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 360px;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .deck-card .emoji { font-size: 36px; margin-bottom: 16px; }
+  .deck-card .prompt {
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.5;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .deck-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 12px 22px;
+    margin: 0 6px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .deck-btn:active { border-color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">🤫</div>
+    <h1>For your eyes only</h1>
+    <p class="tagline">No pressure. Just possibility.</p>
+
+    <button class="btn" id="deckBtn" type="button">
+      <span class="icon">🎴</span>
+      Draw a card
+      <span class="sub">the deck decides</span>
+    </button>
+
+    <a class="btn" id="signalBtn" href="https://tally.so/r/rDO7aX">
+      <span class="icon">🔥</span>
+      Up for it?
+      <span class="sub">tap to signal interest</span>
+    </a>
+
+    <p class="footer">🖤</p>
+  </div>
+
+  <!-- Prompt deck overlay -->
+  <div class="overlay" id="overlay">
+    <div class="deck-card">
+      <div class="emoji">🎴</div>
+      <div class="prompt" id="promptText">…</div>
+      <div>
+        <button class="deck-btn" id="drawAgain" type="button">Draw again</button>
+        <button class="deck-btn" id="closeDeck" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ── Prompt deck: naughty icebreakers ─────────────────────────
+  // Flirty confession-style prompts. Edit freely — add, remove,
+  // or reorder. Answers are spoken aloud, never recorded.
+  const PROMPTS = [
+    { emoji: "😈", text: "Name one of your guilty pleasures." },
+    { emoji: "🫦", text: "What's the most flirty text you've ever sent — or received?" },
+    { emoji: "🔑", text: "Confess one thing that always catches your eye on a first look." },
+    { emoji: "💌", text: "What's your most innocent turn-on?" },
+    { emoji: "🔥", text: "Describe your perfect kiss in exactly five words." },
+    { emoji: "🌙", text: "What's the boldest thing you've done after midnight?" },
+    { emoji: "😏", text: "What compliment do you wish someone would give you?" },
+    { emoji: "🎭", text: "Ever had a crush you swore you'd never act on? Details." },
+    { emoji: " spotify", text: "Reveal one song that would absolutely be on your seduction playlist." },
+    { emoji: "🍷", text: "What's your go-to move when you want someone's attention?" },
+    { emoji: "⭐", text: "Share a guilty-pleasure rumor you've heard about yourself — or start one." },
+    { emoji: "🕶️", text: "What's something you find irresistible that would surprise me?" },
+    { emoji: "📱", text: "Show (or describe) the last thing you saved to your 'hidden' folder." },
+    { emoji: "🫣", text: "Confess a fantasy you've never told anyone." },
+    { emoji: "🎰", text: "Truth or dare? If truth: your worst date gone deliciously wrong." },
+    { emoji: "💋", text: "What's one thing you'd do tonight if you knew there'd be no consequences?" }
+  ];
+
+  const overlay = document.getElementById("overlay");
+  const promptText = document.getElementById("promptText");
+  const deckEmoji = document.querySelector(".deck-card .emoji");
+
+  // ── Random draw with no immediate repeats ────────────────────
+  let last = -1;
+
+  function draw() {
+    let i;
+    if (PROMPTS.length > 1) {
+      do { i = Math.floor(Math.random() * PROMPTS.length); } while (i === last);
+    } else {
+      i = 0;
+    }
+    last = i;
+    const p = PROMPTS[i];
+    deckEmoji.textContent = p.emoji === " spotify" ? "🎧" : p.emoji;
+    promptText.textContent = p.text;
+  }
+
+  document.getElementById("deckBtn").addEventListener("click", () => {
+    draw();
+    overlay.classList.add("open");
+  });
+  document.getElementById("drawAgain").addEventListener("click", draw);
+  document.getElementById("closeDeck").addEventListener("click", () =>
+    overlay.classList.remove("open")
+  );
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) overlay.classList.remove("open");
+  });
+</script>
+</body>
+</html>
