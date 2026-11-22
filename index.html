@@ -126,6 +126,10 @@
 </style>
 </head>
 <body>
+  <div id="quiet-state">
+    <p id="offline-msg"></p>
+      <!-- Add quiet content here -->
+  </div>
   <div class="wrap">
     <div class="logo">🤫</div>
     <h1>For your eyes only</h1>
@@ -223,28 +227,23 @@
   });
 
 // ---- availability check -------------------------------------------
-const STATE_URL = "https://raw.githubusercontent.com/quiet-nebula-9x/quiet-card/main/state.json";
-const POLL_MS   = 60_000;  // re-check every minute
+const OFFLINE_LINES = [
+  "The stage lights are down. Back soon.",
+  "Curtain's drawn for now.",
+  "Off the air — check back later.",
+  "Nothing's playing tonight. The theatre stays open.",
+];
 
 async function checkAvailability() {
   const live = await isLive();
   document.getElementById("quiet-state").hidden = live;
   document.getElementById("live-panel").hidden  = !live;
-}
-
-async function isLive() {
-  try {
-    const res = await fetch(`${STATE_URL}?t=${Date.now()}`, { cache: "no-store" });
-    if (!res.ok) return false;
-    const state = await res.json();
-    return typeof state.active_until === "number" && Date.now() < state.active_until;
-  } catch {
-    return false; // any failure = fail closed to quiet state
+  if (!live) {
+    const msg = document.getElementById("offline-msg");
+    msg.textContent =
+      OFFLINE_LINES[Math.floor(Math.random() * OFFLINE_LINES.length)];
   }
 }
-
-checkAvailability();
-setInterval(checkAvailability, POLL_MS);
 </script>
 </body>
 </html>
