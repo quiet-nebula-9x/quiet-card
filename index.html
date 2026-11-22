@@ -122,16 +122,74 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .deck-btn:active { border-color: rgba(255,255,255,0.5); }
+  .deck-btn:active { 
+    border-color: rgba(255,255,255,0.5); 
+  }
+  /* --- quiet-state layered aesthetics --- */
+  #quiet-state { text-align: center; color: #666; }
+
+  #last-beat {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+    min-height: 1em; /* reserves space so layout doesn't jump */
+  }
+
+  .curtain-hem {
+    width: 180px;
+    max-width: 70%;
+    opacity: 0.5;
+    margin: 14px auto 6px;
+    display: block;
+  }
+
+  .knot {
+    width: 40px;
+    opacity: 0.45;
+    margin: 8px auto 4px;
+    display: block;
+  }
+
+  .footer {
+    font-size: 1.1rem;
+    display: inline-block;
+    transition: filter 0.35s ease, transform 0.35s ease;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .footer:hover,
+  .footer:active {
+    filter: brightness(1.7) drop-shadow(0 0 7px rgba(109, 74, 255, 0.85));
+    transform: scale(1.18);
+  }
 </style>
 </head>
 <body>
   <div id="quiet-state"> <!-- quiet content -->
-    <h2>CARD</h2>
-    <p id="offline-msg"></p>
-      <!-- Add quiet content here -->
-    <p class="footer">🖤</p>
-  </div>
+  <h2>CARD</h2>
+  <p id="offline-msg"></p>
+  <p id="last-beat"></p> <!-- time-stamped tagline slot -->
+
+  <!-- curtain hem — two drapes, gap at center -->
+  <svg class="curtain-hem" viewBox="0 0 200 44" aria-hidden="true">
+    <path d="M2,2 Q50,42 93,38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M198,2 Q150,42 107,38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+
+  <!-- NEW: knot glyph — two interlaced loops, dashes suggest the weave -->
+  <svg class="knot" viewBox="0 0 48 48" aria-hidden="true">
+    <ellipse cx="24" cy="24" rx="17" ry="10" transform="rotate(30 24 24)"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="24" cy="24" rx="17" ry="10" transform="rotate(-30 24 24)"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-dasharray="14 6"/>
+  </svg>
+
+  <p class="footer">🖤</p>
+</div>
 
   <div id="live-panel" hidden>
   <div class="wrap">
@@ -187,25 +245,40 @@
   "A whisper is rehearsing. Come back closer to curtain."
 ];
 
-  // ---- state check ----------------------------------------------
-  async function isLive() {
+  // ---- state fetch -----------------------------------------------
+  async function getState() {
     try {
       const res = await fetch(`${STATE_URL}?t=${Date.now()}`, { cache: "no-store" });
-      if (!res.ok) return false;
-      const state = await res.json();
-      return typeof state.active_until === "number" && Date.now() < state.active_until;
+      if (!res.ok) return null;
+      return await res.json();
     } catch {
-      return false; // any failure = quiet
+      return null;
     }
   }
 
   async function checkAvailability() {
-    const live = await isLive();
+    const state = await getState();
+    const live = !!state &&
+      typeof state.active_until === "number" &&
+      Date.now() < state.active_until;
+
     document.getElementById("quiet-state").hidden = live;
     document.getElementById("live-panel").hidden  = !live;
+
     if (!live) {
       document.getElementById("offline-msg").textContent =
         OFFLINE_LINES[Math.floor(Math.random() * OFFLINE_LINES.length)];
+
+      // time-stamped tagline: expiry of the last published beat
+      const beatEl = document.getElementById("last-beat");
+      if (typeof state?.active_until === "number" && state.active_until > 0) {
+        const t = new Date(state.active_until).toLocaleTimeString([], {
+          hour: "2-digit", minute: "2-digit", hour12: false,
+        });
+        beatEl.textContent = `last transmission: ${t}`;
+      } else {
+        beatEl.textContent = ""; // active_until is 0 → never aired
+      }
     }
   }
 
