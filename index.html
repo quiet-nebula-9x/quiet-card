@@ -126,10 +126,12 @@
 </style>
 </head>
 <body>
-  <div id="quiet-state">
+  <div id="quiet-state"> <!-- quiet content -->
     <p id="offline-msg"></p>
       <!-- Add quiet content here -->
   </div>
+
+  <div id="live-panel" hidden>
   <div class="wrap">
     <div class="logo">🤫</div>
     <h1>For your eyes only</h1>
@@ -156,9 +158,6 @@
     <p class="footer">🖤</p>
   </div>
   
-  <div id="quiet-state">...</div>   <!-- default content -->
-  <div id="live-panel" hidden>...</div>  <!-- Tally embed, prompt deck, etc. -->
-  
   <!-- Prompt deck overlay -->
   <div class="overlay" id="overlay">
     <div class="deck-card">
@@ -170,7 +169,8 @@
       </div>
     </div>
   </div>
-
+</div>
+  
 <script>
   // ── Prompt deck: icebreakers ─────────────────────────
   // Stylized prompts -- add, remove, or reorder. 
@@ -229,9 +229,11 @@
 // ---- availability check -------------------------------------------
 const OFFLINE_LINES = [
   "The stage lights are down. Back soon.",
-  "Curtain's drawn for now.",
-  "Off the air — check back later.",
-  "Nothing's playing tonight. The theatre stays open.",
+  "Curtain's drawn... for now.",
+  "The door is closed, but not locked.",
+  "Tonight's performance is resting between acts.",
+  "Patience is part of the game.",
+  "A whisper is rehearsing. Come back closer to curtain."
 ];
 
 async function checkAvailability() {
