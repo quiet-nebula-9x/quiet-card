@@ -151,7 +151,10 @@
 
     <p class="footer">🖤</p>
   </div>
-
+  
+  <div id="quiet-state">...</div>   <!-- default content -->
+  <div id="live-panel" hidden>...</div>  <!-- Tally embed, prompt deck, etc. -->
+  
   <!-- Prompt deck overlay -->
   <div class="overlay" id="overlay">
     <div class="deck-card">
@@ -165,9 +168,9 @@
   </div>
 
 <script>
-  // ── Prompt deck: naughty icebreakers ─────────────────────────
-  // Flirty confession-style prompts. Edit freely — add, remove,
-  // or reorder. Answers are spoken aloud, never recorded.
+  // ── Prompt deck: icebreakers ─────────────────────────
+  // Stylized prompts -- add, remove, or reorder. 
+  // Answers are ONLY spoken aloud. 
   const PROMPTS = [
     { emoji: "😈", text: "Name one of your guilty pleasures." },
     { emoji: "🫦", text: "What's the most flirty text you've ever sent — or received?" },
@@ -218,6 +221,30 @@
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) overlay.classList.remove("open");
   });
+
+// ---- availability check -------------------------------------------
+const STATE_URL = "https://raw.githubusercontent.com/quiet-nebula-9x/quiet-card/main/state.json";
+const POLL_MS   = 60_000;  // re-check every minute
+
+async function checkAvailability() {
+  const live = await isLive();
+  document.getElementById("quiet-state").hidden = live;
+  document.getElementById("live-panel").hidden  = !live;
+}
+
+async function isLive() {
+  try {
+    const res = await fetch(`${STATE_URL}?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return false;
+    const state = await res.json();
+    return typeof state.active_until === "number" && Date.now() < state.active_until;
+  } catch {
+    return false; // any failure = fail closed to quiet state
+  }
+}
+
+checkAvailability();
+setInterval(checkAvailability, POLL_MS);
 </script>
 </body>
 </html>
