@@ -135,7 +135,17 @@
     opacity: 0.55;
     min-height: 1em; /* reserves space so layout doesn't jump */
   }
+  
+  @keyframes sway {
+    0%, 100% { transform: rotate(-0.4deg); }
+    50%      { transform: rotate(0.4deg); }
+  }
 
+  .curtain-hem {
+    transform-origin: 50% 0%;   /* pivot at the top, like fabric hanging from a rail */
+    animation: sway 7s ease-in-out infinite;
+  }
+  
   .curtain-hem {
     width: 180px;
     max-width: 70%;
