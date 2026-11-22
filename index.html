@@ -127,6 +127,7 @@
 </head>
 <body>
   <div id="quiet-state"> <!-- quiet content -->
+    <h2>CARD</h2>
     <p id="offline-msg"></p>
       <!-- Add quiet content here -->
   </div>
@@ -170,8 +171,46 @@
     </div>
   </div>
 </div>
-  
+
 <script>
+  // ---- config ---------------------------------------------------
+  const STATE_URL = "https://raw.githubusercontent.com/quiet-nebula-9x/quiet-card/main/state.json";
+  const POLL_MS = 60_000;
+
+  const OFFLINE_LINES = [
+  "The stage lights are down. Back soon.",
+  "Curtain's drawn... for now.",
+  "The door is closed, but not locked.",
+  "Tonight's performance is resting between acts.",
+  "Patience is part of the game.",
+  "A whisper is rehearsing. Come back closer to curtain."
+];
+
+  // ---- state check ----------------------------------------------
+  async function isLive() {
+    try {
+      const res = await fetch(`${STATE_URL}?t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return false;
+      const state = await res.json();
+      return typeof state.active_until === "number" && Date.now() < state.active_until;
+    } catch {
+      return false; // any failure = quiet
+    }
+  }
+
+  async function checkAvailability() {
+    const live = await isLive();
+    document.getElementById("quiet-state").hidden = live;
+    document.getElementById("live-panel").hidden  = !live;
+    if (!live) {
+      document.getElementById("offline-msg").textContent =
+        OFFLINE_LINES[Math.floor(Math.random() * OFFLINE_LINES.length)];
+    }
+  }
+
+  checkAvailability();
+  setInterval(checkAvailability, POLL_MS);
+
   // ── Prompt deck: icebreakers ─────────────────────────
   // Stylized prompts -- add, remove, or reorder. 
   // Answers are ONLY spoken aloud. 
@@ -225,27 +264,6 @@
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) overlay.classList.remove("open");
   });
-
-// ---- availability check -------------------------------------------
-const OFFLINE_LINES = [
-  "The stage lights are down. Back soon.",
-  "Curtain's drawn... for now.",
-  "The door is closed, but not locked.",
-  "Tonight's performance is resting between acts.",
-  "Patience is part of the game.",
-  "A whisper is rehearsing. Come back closer to curtain."
-];
-
-async function checkAvailability() {
-  const live = await isLive();
-  document.getElementById("quiet-state").hidden = live;
-  document.getElementById("live-panel").hidden  = !live;
-  if (!live) {
-    const msg = document.getElementById("offline-msg");
-    msg.textContent =
-      OFFLINE_LINES[Math.floor(Math.random() * OFFLINE_LINES.length)];
-  }
-}
 </script>
 </body>
 </html>
