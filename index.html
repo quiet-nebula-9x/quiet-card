@@ -122,10 +122,11 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .deck-btn:active { 
-    border-color: rgba(255,255,255,0.5); 
+  .deck-btn:active {
+    border-color: rgba(255,255,255,0.5);
   }
-  /* --- quiet-state layered aesthetics --- */
+
+  /* ---------- quiet-state layered aesthetics ---------- */
   #quiet-state { text-align: center; color: #666; }
 
   #last-beat {
@@ -133,25 +134,22 @@
     font-size: 0.7rem;
     letter-spacing: 0.06em;
     opacity: 0.55;
-    min-height: 1em; /* reserves space so layout doesn't jump */
-  }
-  
-  @keyframes sway {
-    0%, 100% { transform: rotate(-0.4deg); }
-    50%      { transform: rotate(0.4deg); }
+    min-height: 1em;
   }
 
-  .curtain-hem {
-    transform-origin: 50% 0%;   /* pivot at the top, like fabric hanging from a rail */
-    animation: sway 7s ease-in-out infinite;
+  /* Curtain hem: single consolidated rule (sizing + sway together) */
+  @keyframes sway {
+    0%, 100% { transform: rotate(-1.2deg); }
+    50%      { transform: rotate(1.2deg); }
   }
-  
   .curtain-hem {
     width: 180px;
     max-width: 70%;
     opacity: 0.5;
     margin: 14px auto 6px;
     display: block;
+    transform-origin: 50% 0%;   /* pivot at the top, fabric on a rail */
+    animation: sway 6s ease-in-out infinite;
   }
 
   .knot {
@@ -161,25 +159,32 @@
     display: block;
   }
 
-  .footer {
-    font-size: 1.1rem;
-    display: inline-block;
-    transition: filter 0.35s ease, transform 0.35s ease;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .footer:hover,
-  .footer:active {
-    filter: brightness(1.7) drop-shadow(0 0 7px rgba(109, 74, 255, 0.85));
-    transform: scale(1.18);
-  }
+  /* Heart: ambient breathing; touching stills it and lets it glow */
   @keyframes breathe {
     0%, 100% { opacity: 0.35; transform: scale(1); }
     50%      { opacity: 0.75; transform: scale(1.04); }
   }
-  .footer { animation: breathe 4s ease-in-out infinite; }
+  .footer {
+    font-size: 1.1rem;
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: filter 0.35s ease, transform 0.35s ease;
+    animation: breathe 4s ease-in-out infinite;
+  }
+  .footer:hover,
+  .footer:active {
+    animation: none;            /* pause breathing so hover transform can act */
+    transform: scale(1.18);
+    filter: brightness(1.7) drop-shadow(0 0 7px rgba(109, 74, 255, 0.85));
+  }
+
+  /* Respect users who disable motion */
+  @media (prefers-reduced-motion: reduce) {
+    .curtain-hem, .footer { animation: none; }
+  }
 </style>
 </head>
 <body>
