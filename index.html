@@ -165,11 +165,16 @@
     filter: brightness(1.7) drop-shadow(0 0 7px rgba(109, 74, 255, 0.85));
     transform: scale(1.18);
   }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50%      { opacity: 0.75; transform: scale(1.04); }
+  }
+  .footer { animation: breathe 4s ease-in-out infinite; }
 </style>
 </head>
 <body>
   <div id="quiet-state"> <!-- quiet content -->
-  <h2>CARD</h2>
+  <h2>🂱</h2>
   <p id="offline-msg"></p>
   <p id="last-beat"></p> <!-- time-stamped tagline slot -->
 
